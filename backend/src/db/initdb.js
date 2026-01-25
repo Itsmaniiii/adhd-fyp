@@ -8,7 +8,7 @@ const initDb = async () => {
 
   try {
     await pool.query(sql);
-    console.log("Tables created from backend");
+    console.log("DB Connected ✅");
   } catch (err) {
     console.error("❌ DB init failed:", err.message);
   }
