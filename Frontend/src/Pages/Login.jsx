@@ -78,14 +78,6 @@ const Login = () => {
     }
   };
 
-  const handleDemoLogin = () => {
-    setFormData({
-      email: "demo@adhd-tracker.com",
-      password: "demo123",
-      rememberMe: true,
-    });
-  };
-
   return (
     <div className="login-container">
       <div className="login-card">
@@ -220,15 +212,7 @@ const Login = () => {
                 'Sign In'
               )}
             </button>
-            
-            <button
-              type="button"
-              className="demo-button"
-              onClick={handleDemoLogin}
-              disabled={isLoading}
-            >
-              Try Demo Account
-            </button>
+  
             
             <div className="divider">
               <span className="divider-text">or continue with</span>
