@@ -1,7 +1,8 @@
 import React from "react";
-
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
+  const navigate = useNavigate();
   return (
     <div className="home-container">
       {/* Hero Section */}
@@ -15,8 +16,11 @@ const Home = () => {
             and monitor your progress with intuitive analytics.
           </p>
           <div className="cta-buttons">
-            <button className="btn btn-primary">Get Started</button>
-            <button className="btn btn-secondary">Learn More</button>
+            <button
+              className="btn btn-primary btn-large"
+              onClick={() => navigate("/questionnaire")} >
+              Get Start
+            </button>
           </div>
         </div>
         <div className="hero-image">
@@ -156,8 +160,11 @@ const Home = () => {
       <section className="cta-section">
         <h2>Start Your ADHD Management Journey Today</h2>
         <p>Join thousands who have found structure and insight with our tracking tools.</p>
-        <button className="btn btn-primary btn-large">Start Free Trial</button>
-        <p className="cta-note">No credit card required • 14-day free trial</p>
+        <button
+           className="btn btn-primary btn-large"
+           onClick={() => navigate("/questionnaire")}>
+           Start Trial
+        </button>
       </section>
     </div>
   );
