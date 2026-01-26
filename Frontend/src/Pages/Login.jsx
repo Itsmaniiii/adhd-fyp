@@ -67,8 +67,8 @@ const Login = () => {
       // Save token
       localStorage.setItem("token", res.data.token);
 
-      // Navigate to dashboard
-      navigate("/dashboard");
+      // Navigate to home
+      navigate("/");
     } catch (error) {
       setErrors({
         submit: error.response?.data?.message || "Login failed. Please try again.",
@@ -243,10 +243,6 @@ const Login = () => {
                 <span className="social-icon">🍎</span>
                 Continue with Apple
               </button>
-            </div>
-            
-            <div className="signup-link">
-              Don't have an account? <Link to="/signup" className="signup-text">Sign up for free</Link>
             </div>
           </form>
           
