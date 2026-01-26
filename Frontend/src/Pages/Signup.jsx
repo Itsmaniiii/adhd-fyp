@@ -30,7 +30,7 @@ const Signup = () => {
     else if (formData.name.length < 2) newErrors.name = "Name must be at least 2 characters";
 
     if (!formData.email) newErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email address is invalid";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Email address is invalid";
 
     if (!formData.password) newErrors.password = "Password is required";
     else if (formData.password.length < 8) newErrors.password = "Password must be at least 8 characters";
@@ -68,7 +68,13 @@ const Signup = () => {
   // Form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting form", formData);
+
+    // Check terms checkbox
+    const termsCheckbox = document.getElementById("terms");
+    if (!termsCheckbox.checked) {
+      setErrors({ submit: "You must agree to the Terms & Conditions and Privacy Policy" });
+      return;
+    }
 
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
@@ -129,6 +135,8 @@ const Signup = () => {
                   onChange={handleChange}
                   className={`form-input ${errors.name ? 'error' : ''}`}
                   placeholder="John Doe"
+                  disabled={isSubmitting}
+                  autoComplete="name"
                 />
                 {errors.name && <div className="error-message">{errors.name}</div>}
               </div>
@@ -145,6 +153,8 @@ const Signup = () => {
                   onChange={handleChange}
                   className={`form-input ${errors.email ? 'error' : ''}`}
                   placeholder="john@example.com"
+                  disabled={isSubmitting}
+                  autoComplete="email"
                 />
                 {errors.email && <div className="error-message">{errors.email}</div>}
               </div>
@@ -160,6 +170,8 @@ const Signup = () => {
                     onChange={handleChange}
                     className={`form-input ${errors.password ? 'error' : ''}`}
                     placeholder="••••••••"
+                    disabled={isSubmitting}
+                    autoComplete="new-password"
                   />
                   <button
                     type="button"
@@ -204,6 +216,8 @@ const Signup = () => {
                     onChange={handleChange}
                     className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
                     placeholder="••••••••"
+                    disabled={isSubmitting}
+                    autoComplete="new-password"
                   />
                   <button
                     type="button"
@@ -219,11 +233,9 @@ const Signup = () => {
               {/* Terms & Conditions */}
               <div className="checkbox-container">
                 <input type="checkbox" id="terms" className="checkbox-input" required />
+                <span className="checkbox-custom"></span>
                 <label htmlFor="terms" className="checkbox-label">
-                  I agree to the{" "}
-                  <button type="button" className="checkbox-link">Terms & Conditions</button>{" "}
-                  and{" "}
-                  <button type="button" className="checkbox-link">Privacy Policy</button>
+                  I agree to the Terms & Conditions and Privacy Policy
                 </label>
               </div>
 
@@ -236,14 +248,18 @@ const Signup = () => {
                   </>
                 ) : "Create Account"}
               </button>
+              {/* Already have account link */}
+              <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
+                <p style={{ color: "#666", fontSize: "0.95rem" }}>
+                  Already have an account?{" "}
+                  <a href="/login" style={{ color: "#6366f1", textDecoration: "none", fontWeight: "600" }}>
+                    Sign In
+                  </a>
+                </p>
+              </div>
             </form>
           </div>
         </div>
-        <form onSubmit={(e) => { e.preventDefault(); console.log("Submitted"); }}>
-  <input type="text" name="name" />
-  <button type="submit">Create Account</button>
-</form>
-
 
         {/* Footer */}
         <p className="signup-footer">© 2024 ADHD Tracker. All rights reserved.</p>
