@@ -165,6 +165,16 @@ const Home = () => {
            onClick={() => navigate("/questionnaire")}>
            Start Trial
         </button>
+         <button
+        className="chatbot-float-btn"
+        onClick={() => navigate("/chatbot")}
+        aria-label="Open AI Chatbot"
+        title="AI Chatbot Assistant"
+      >
+        <div className="chatbot-float-icon">🤖</div>
+        <span className="chatbot-float-text">ADHD AI Assistant</span>
+        <div className="chatbot-float-pulse"></div>
+      </button>
       </section>
     </div>
   );
