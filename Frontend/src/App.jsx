@@ -8,6 +8,7 @@ import Signup from "./Pages/Signup";
 import Tracker from "./Pages/Tracker";
 import Questionnaire from "./Pages/Questionnaire";
 import SeverityCheck from './Pages/SeverityCheck';
+import Chatbot from "./Pages/Chatbot";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -38,6 +39,9 @@ function App() {
         <Route path="/severity-check" element={<ProtectedRoute><SeverityCheck /></ProtectedRoute>} />
         <Route path="/questionnaire" element={<ProtectedRoute><Questionnaire /></ProtectedRoute>} />
 
+
+        {/* ✅ ADD THIS */}
+        <Route path="/chatbot" element={<ProtectedRoute><Chatbot /></ProtectedRoute>} />
         {/* Catch all - redirect to home */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
