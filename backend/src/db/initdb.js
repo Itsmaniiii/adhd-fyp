@@ -3,11 +3,16 @@ import path from "path";
 import pool from "./postgres.js";
 
 const initDb = async () => {
-  const filePath = path.join(process.cwd(), "sql", "schema.sql");
-  const sql = fs.readFileSync(filePath, "utf-8");
-
   try {
-    await pool.query(sql);
+    const sqlFolder = path.join(process.cwd(), "sql");
+    const files = fs.readdirSync(sqlFolder)
+      .filter(file => file.endsWith(".sql"))
+      .sort(); // sort to maintain order if needed
+
+    for (const file of files) {
+      const sql = fs.readFileSync(path.join(sqlFolder, file), "utf-8");
+      await pool.query(sql);
+    }
     console.log("DB Connected ✅");
   } catch (err) {
     console.error("❌ DB init failed:", err.message);
