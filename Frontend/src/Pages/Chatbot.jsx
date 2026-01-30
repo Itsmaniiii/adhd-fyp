@@ -95,29 +95,56 @@ const Chatbot = () => {
     if (!inputValue.trim()) return;
 
     const userMessage = {
-      id: messages.length + 1,
+      id: Date.now(),
       text: inputValue,
       sender: "user",
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     };
 
     setMessages(prev => [...prev, userMessage]);
     setInputValue("");
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      const botResponse = {
-        id: messages.length + 2,
-        text: `I understand you're asking about "${inputValue}". For ADHD management, try breaking tasks into smaller chunks and setting clear priorities. Would you like more specific strategies?`,
-        sender: "bot",
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      setMessages(prev => [...prev, botResponse]);
-      setIsLoading(false);
-    }, 1500);
-  };
+    try {
+      // 1. Agar aapne axios file banayi hai toh axios.post use karein, 
+      // warna fetch ka URL sahi karein:
+      const res = await fetch("http://localhost:5000/api/chat", { // URL check karein (api/ hataya hai)
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          // AI ko sirf text chahiye hota hai
+          history: [...messages, userMessage].map(m => ({
+            role: m.sender === "user" ? "user" : "model",
+            text: m.text
+          }))
+        })
+      });
 
+      if (!res.ok) throw new Error("Server down");
+
+      const data = await res.json();
+
+      const botResponse = {
+        id: Date.now() + 1,
+        text: data.reply, // Backend se 'reply' key aa rahi hai
+        sender: "bot",
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      };
+
+      setMessages(prev => [...prev, botResponse]);
+
+    } catch (err) {
+      console.error("Connection Error:", err);
+      setMessages(prev => [...prev, {
+        id: Date.now() + 2,
+        text: "⚠️ Connection failed. Make sure Backend is running on port 5000.",
+        sender: "bot",
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const suggestedQuestions = [
     "How to improve focus?",
     "ADHD productivity tips",

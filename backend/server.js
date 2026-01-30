@@ -6,6 +6,7 @@ import profileRoutes from "./src/routes/profileRoutes.js";
 import childRoutes from "./src/routes/childRoutes.js";
 import geneticsRoutes from "./src/routes/geneticsRoutes.js";
 import questionnaireRoutes from "./src/routes/questionnaireRoutes.js";
+import chatRoutes from "./src/routes/chatRoutes.js";
 
 
 const app = express();
@@ -14,10 +15,12 @@ app.use(express.json());
 
 initDb();
 
+app.use("/api", chatRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/child", childRoutes);
 app.use("/api/genetics", geneticsRoutes);
 app.use("/api/questionnaire", questionnaireRoutes);
+
 
 app.use("/api", profileRoutes);
 
