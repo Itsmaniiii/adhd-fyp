@@ -132,7 +132,7 @@ const Home = () => {
             and identify my most focused hours. I've improved my daily structure by 40% in just 2 months.
           </p>
           <div className="testimonial-author">
-            <div className="author-avatar">JS</div>
+            <div className="author-avatar">AA</div>
             <div className="author-info">
               <h4>Adil Abbas</h4>
               <p>User for 6 months</p>
@@ -148,7 +148,7 @@ const Home = () => {
             and identify my most focused hours. I've improved my daily structure by 40% in just 2 months.
           </p>
           <div className="testimonial-author">
-            <div className="author-avatar">JS</div>
+            <div className="author-avatar">MH</div>
             <div className="author-info">
               <h4>Muhammad Hassan</h4>
               <p>User for 6 months</p>
