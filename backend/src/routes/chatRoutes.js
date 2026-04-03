@@ -5,6 +5,7 @@ const router = express.Router();
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY }); // .env mein key rakhein
 
 router.post("/chat", async (req, res) => {
+  console.log("Using API Key:", process.env.GROQ_API_KEY ? "Key Found ✅" : "Key is UNDEFINED ❌");
   try {
     const { history } = req.body;
     const lastMsg = history[history.length - 1].text || history[history.length - 1].content;
