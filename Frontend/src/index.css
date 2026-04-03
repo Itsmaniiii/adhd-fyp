@@ -4298,7 +4298,7 @@ body, html {
     background: linear-gradient(135deg, #4c51bf 0%, #7c3aed 100%);
   }
 }
-/* Chatbot.css - Professional Styling */
+/* Chatbot.css  */
 
 /* Reset and Base Styles */
 .chatbot-container {
@@ -5345,8 +5345,8 @@ body, html {
 .chatbot-container {
   margin-top: 60px; /* Adjust according to navbar height */
 }
-/* Left side se right side karne ke liye bas yeh do changes: */
+/* Left side se right side karne ke liye  changes: */
 .chatbot-float-btn {
-  left: auto; /* Ye remove karo ya override karo */
+  left: auto; 
   right: 20px; /* Yeh add karo */
 }
