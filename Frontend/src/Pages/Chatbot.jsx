@@ -43,13 +43,12 @@ const Chatbot = () => {
         setIsListening(false);
       };
 
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-        if (speechText.trim()) {
-          setInputValue(speechText);
-          setSpeechText("");
-        }
-      };
+     recognitionRef.current.onend = () => {
+      setIsListening(false);
+
+      
+};
+
     } else {
       console.warn('Speech recognition not supported in this browser');
     }
@@ -119,6 +118,267 @@ const Chatbot = () => {
           }))
         })
       });
+
+      if (!res.ok) throw new Error("Server down");
+
+      const data = await res.json();
+
+      const botResponse = {
+        id: Date.now() + 1,
+        text: data.reply, // Backend se 'reply' key aa rahi hai
+        sender: "bot",
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      };
+
+      setMessages(prev => [...prev, botResponse]);
+
+    } catch (err) {
+      console.error("Connection Error:", err);
+      setMessages(prev => [...prev, {
+        id: Date.now() + 2,
+        text: "⚠️ Connection failed. Make sure Backend is running on port 5000.",
+        sender: "bot",
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+ const handleVoiceSend = React.useCallback(async (text) => {
+  const userMessage = {
+    id: Date.now(),
+    text,
+    sender: "user",
+    timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  };
+
+  setMessages(prev => [...prev, userMessage]);
+  setIsLoading(true);
+
+  try {
+    const res = await fetch("http://localhost:5000/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        history: [...messages, userMessage].map(m => ({
+          role: m.sender === "user" ? "user" : "model",
+          text: m.text
+        }))
+      })
+    });
+
+    const data = await res.json();
+
+    const botResponse = {
+      id: Date.now() + 1,
+      text: data.reply,
+      sender: "bot",
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    };
+
+    setMessages(prev => [...prev, botResponse]);
+
+    // 🔊 BOT VOICE RESPONSE
+    speakText(data.reply);
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setIsLoading(false);
+  }
+}, [messages]);
+
+const speakText = (text) => {
+  // Check if speech synthesis is supported
+  if (!window.speechSynthesis) {
+    console.warn('Speech synthesis not supported in this browser');
+    return;
+  }
+
+  if (!text || typeof text !== 'string') {
+    console.warn('Invalid text provided for speech');
+    return;
+  }
+
+  // Cancel any currently speaking text to avoid overlap
+  window.speechSynthesis.cancel();
+
+  // Enhanced text cleaning
+  const cleanText = text
+    // Remove special characters, symbols, and unwanted punctuation
+    .replace(/[*@#$%^&*()_+=[\]{}|;:"'<>,./?\\-]/g, ' ')
+    // Remove URLs
+    .replace(/(https?:\/\/[^\s]+)/g, '')
+    // Remove email addresses
+    .replace(/[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}/g, '')
+    // Remove hashtags and mentions
+    .replace(/[#@]\w+/g, '')
+    // Replace multiple spaces with single space
+    .replace(/\s+/g, ' ')
+    // Trim whitespace
+    .trim();
+
+  // If nothing left after cleaning, return
+  if (!cleanText) {
+    console.warn('No valid text to speak after cleaning');
+    return;
+  }
+
+  console.log('Cleaned text for speech:', cleanText);
+
+  // Enhanced language detection
+  const containsUrdu = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\u0700-\u074F]/.test(cleanText);
+  const containsEnglish = /[a-zA-Z]/.test(cleanText);
+
+  // Create utterance with cleaned text
+  const utterance = new SpeechSynthesisUtterance(cleanText);
+
+  // Set language based on content with better detection
+  let selectedLang = 'en-US';
+  
+  if (containsUrdu && !containsEnglish) {
+    // Only Urdu content
+    selectedLang = 'ur-PK';
+  } else if (containsUrdu && containsEnglish) {
+    // Mixed content - prioritize based on majority
+    const urduChars = (cleanText.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\u0700-\u074F]/g) || []).length;
+    const englishChars = (cleanText.match(/[a-zA-Z]/g) || []).length;
+    selectedLang = urduChars > englishChars ? 'ur-PK' : 'en-US';
+  } else {
+    selectedLang = 'en-US';
+  }
+
+  utterance.lang = selectedLang;
+  utterance.rate = 1;     // Normal speed
+  utterance.pitch = 1.1;  // Slightly higher pitch for female voice
+  utterance.volume = 1;   // Full volume
+
+  // Handle voices - ONLY FEMALE VOICES
+  const handleVoices = () => {
+    const voices = window.speechSynthesis.getVoices();
+    
+    if (voices.length === 0) {
+      console.warn('No voices available');
+      window.speechSynthesis.speak(utterance);
+      return;
+    }
+
+    // Find FEMALE voices for the selected language
+    const femaleVoices = voices.filter(voice => {
+      const voiceName = voice.name.toLowerCase();
+      const isFemale = voiceName.includes('female') || 
+                      voiceName.includes('woman') || 
+                      voiceName.includes('lady') ||
+                      voiceName.includes('samantha') || // Common female voice names
+                      voiceName.includes('zira') ||
+                      voiceName.includes('veena') ||
+                      voiceName.includes('karen') ||
+                      voiceName.includes('tessa') ||
+                      voiceName.includes('susan') ||
+                      voiceName.includes('catherine') ||
+                      voiceName.includes('audrey') ||
+                      voiceName.includes('google uk female') ||
+                      voiceName.includes('microsoft zira') ||
+                      voiceName.includes('microsoft heera') ||
+                      voiceName.includes('microsoft hema');
+      
+      if (selectedLang === 'ur-PK') {
+        // For Urdu, check for female voices
+        return isFemale && (voice.lang.startsWith('ur') || 
+               voice.lang === 'ur-PK' || 
+               voice.lang === 'ur' ||
+               voice.name.toLowerCase().includes('urdu'));
+      } else {
+        // For English, check for female voices
+        return isFemale && (voice.lang.startsWith('en') || 
+               voice.lang === 'en-US' || 
+               voice.lang === 'en-GB' ||
+               voice.name.toLowerCase().includes('english'));
+      }
+    });
+
+    if (femaleVoices.length > 0) {
+      // Sort female voices by quality (prefer natural/local voices)
+      const sortedFemaleVoices = femaleVoices.sort((a, b) => {
+        const aQuality = a.name.toLowerCase().includes('natural') ? 3 : 
+                        a.name.toLowerCase().includes('premium') ? 2 : 
+                        a.name.toLowerCase().includes('female') ? 1 : 0;
+        const bQuality = b.name.toLowerCase().includes('natural') ? 3 : 
+                        b.name.toLowerCase().includes('premium') ? 2 : 
+                        b.name.toLowerCase().includes('female') ? 1 : 0;
+        return bQuality - aQuality;
+      });
+      
+      utterance.voice = sortedFemaleVoices[0];
+      console.log('Selected female voice:', utterance.voice?.name, 'for language:', selectedLang);
+    } else {
+      // If no specific female voice found, try to find any female voice
+      const anyFemaleVoice = voices.find(voice => {
+        const voiceName = voice.name.toLowerCase();
+        return voiceName.includes('female') || 
+               voiceName.includes('woman') || 
+               voiceName.includes('lady') ||
+               voiceName.includes('samantha') ||
+               voiceName.includes('zira');
+      });
+      
+      if (anyFemaleVoice) {
+        utterance.voice = anyFemaleVoice;
+        console.log('Using generic female voice:', utterance.voice?.name);
+      } else {
+        // Last resort: Use first available voice but adjust pitch higher
+        utterance.voice = voices[0];
+        utterance.pitch = 1.2; // Higher pitch to sound more feminine
+        console.warn('No female voice found. Using default voice with adjusted pitch.');
+      }
+    }
+
+    // Set up event handlers
+    utterance.onstart = () => {
+      console.log('Female speech synthesis started');
+    };
+
+    utterance.onend = () => {
+      console.log('Female speech synthesis ended');
+    };
+
+    utterance.onerror = (event) => {
+      console.error('Female speech synthesis error:', event.error);
+    };
+
+    utterance.onpause = () => {
+      console.log('Female speech synthesis paused');
+    };
+
+    utterance.onresume = () => {
+      console.log('Female speech synthesis resumed');
+    };
+
+    // Speak the text
+    try {
+      window.speechSynthesis.speak(utterance);
+    } catch (error) {
+      console.error('Error speaking text with female voice:', error);
+    }
+  };
+
+  // Check if voices are loaded
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length > 0) {
+    handleVoices();
+  } else {
+    // Wait for voices to load
+    window.speechSynthesis.onvoiceschanged = handleVoices;
+  }
+};
+
+useEffect(() => {
+  if (!isListening && speechText.trim()) {
+    handleVoiceSend(speechText);
+    setSpeechText("");
+  }
+}, [isListening, speechText, handleVoiceSend]);
+>>>>>>> c811e69600502bd806545c1b3b33e5551fa0eda5
 
       if (!res.ok) throw new Error("Server down");
 

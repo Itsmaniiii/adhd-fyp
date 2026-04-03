@@ -134,7 +134,7 @@ const Signup = () => {
                   value={formData.name}
                   onChange={handleChange}
                   className={`form-input ${errors.name ? 'error' : ''}`}
-                  placeholder="John Doe"
+                  placeholder="Adil Abbas"
                   disabled={isSubmitting}
                   autoComplete="name"
                 />
@@ -152,7 +152,7 @@ const Signup = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className={`form-input ${errors.email ? 'error' : ''}`}
-                  placeholder="john@example.com"
+                  placeholder="adilabbas12@example.com"
                   disabled={isSubmitting}
                   autoComplete="email"
                 />
