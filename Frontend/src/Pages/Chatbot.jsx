@@ -104,8 +104,6 @@ const Chatbot = () => {
     setIsLoading(true);
 
     try {
-      // 1. Agar aapne axios file banayi hai toh axios.post use karein, 
-      // warna fetch ka URL sahi karein:
       const res = await api.post("/chat", {
         history: [...messages, userMessage].map(m => ({
           role: m.sender === "user" ? "user" : "model",
@@ -113,13 +111,13 @@ const Chatbot = () => {
         }))
       });
 
-      if (!res.ok) throw new Error("Server down");
-
-      const data = await res.json();
+      if (!res || res.status !== 200) {
+        throw new Error("Server returned an error");
+      }
 
       const botResponse = {
         id: Date.now() + 1,
-        text: data.reply, // Backend se 'reply' key aa rahi hai
+        text: res.data.reply || "No response from server.",
         sender: "bot",
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       };
@@ -150,16 +148,20 @@ const handleVoiceSend = useCallback(async (text) => {
   setIsLoading(true);
 
   try {
-    const { data } = await api.post('/chat', {
+    const res = await api.post('/chat', {
       history: [...messages, userMessage].map(m => ({
         role: m.sender === "user" ? "user" : "model",
         text: m.text
       }))
     });
 
+    if (!res || res.status !== 200) {
+      throw new Error("Server returned an error");
+    }
+
     const botResponse = {
       id: Date.now() + 1,
-      text: data.reply,
+      text: res.data.reply || "No response from server.",
       sender: "bot",
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     };
@@ -167,7 +169,7 @@ const handleVoiceSend = useCallback(async (text) => {
     setMessages(prev => [...prev, botResponse]);
 
     // 🔊 BOT VOICE RESPONSE
-    speakText(data.reply);
+    speakText(res.data.reply || "No response from server.");
 
   } catch (err) {
     console.error(err);
