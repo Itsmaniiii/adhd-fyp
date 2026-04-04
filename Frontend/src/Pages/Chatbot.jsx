@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import api from "../api/axios.js";
 
 
 const Chatbot = () => {
@@ -45,9 +46,7 @@ const Chatbot = () => {
 
      recognitionRef.current.onend = () => {
       setIsListening(false);
-
-      
-};
+    };
 
     } else {
       console.warn('Speech recognition not supported in this browser');
@@ -107,16 +106,11 @@ const Chatbot = () => {
     try {
       // 1. Agar aapne axios file banayi hai toh axios.post use karein, 
       // warna fetch ka URL sahi karein:
-      const res = await fetch("http://localhost:5000/api/chat", { // URL check karein (api/ hataya hai)
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          // AI ko sirf text chahiye hota hai
-          history: [...messages, userMessage].map(m => ({
-            role: m.sender === "user" ? "user" : "model",
-            text: m.text
-          }))
-        })
+      const res = await api.post("/chat", {
+        history: [...messages, userMessage].map(m => ({
+          role: m.sender === "user" ? "user" : "model",
+          text: m.text
+        }))
       });
 
       if (!res.ok) throw new Error("Server down");
@@ -144,7 +138,7 @@ const Chatbot = () => {
       setIsLoading(false);
     }
   };
- const handleVoiceSend = React.useCallback(async (text) => {
+const handleVoiceSend = useCallback(async (text) => {
   const userMessage = {
     id: Date.now(),
     text,
@@ -156,18 +150,12 @@ const Chatbot = () => {
   setIsLoading(true);
 
   try {
-    const res = await fetch("http://localhost:5000/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        history: [...messages, userMessage].map(m => ({
-          role: m.sender === "user" ? "user" : "model",
-          text: m.text
-        }))
-      })
+    const { data } = await api.post('/chat', {
+      history: [...messages, userMessage].map(m => ({
+        role: m.sender === "user" ? "user" : "model",
+        text: m.text
+      }))
     });
-
-    const data = await res.json();
 
     const botResponse = {
       id: Date.now() + 1,
@@ -183,10 +171,16 @@ const Chatbot = () => {
 
   } catch (err) {
     console.error(err);
+    setMessages(prev => [...prev, {
+      id: Date.now() + 1,
+      text: "⚠️ Connection failed. Make sure Backend is running on port 5000.",
+      sender: "bot",
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    }]);
   } finally {
     setIsLoading(false);
   }
-}, [messages]);
+}, []);
 
 const speakText = (text) => {
   // Check if speech synthesis is supported
@@ -378,33 +372,7 @@ useEffect(() => {
     setSpeechText("");
   }
 }, [isListening, speechText, handleVoiceSend]);
->>>>>>> c811e69600502bd806545c1b3b33e5551fa0eda5
 
-      if (!res.ok) throw new Error("Server down");
-
-      const data = await res.json();
-
-      const botResponse = {
-        id: Date.now() + 1,
-        text: data.reply, // Backend se 'reply' key aa rahi hai
-        sender: "bot",
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-      };
-
-      setMessages(prev => [...prev, botResponse]);
-
-    } catch (err) {
-      console.error("Connection Error:", err);
-      setMessages(prev => [...prev, {
-        id: Date.now() + 2,
-        text: "⚠️ Connection failed. Make sure Backend is running on port 5000.",
-        sender: "bot",
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-      }]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
   const suggestedQuestions = [
     "How to improve focus?",
     "ADHD productivity tips",
