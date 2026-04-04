@@ -32,6 +32,7 @@ app.use("/api/genetics", geneticsRoutes);
 app.use("/api/questionnaire", questionnaireRoutes);
 app.use("/api/profile", profileRoutes); // Changed from "/api" to "/api/profile" to avoid collisions
 
+
 // 5. Health Check Root Route
 app.get("/", (req, res) => {
     res.send("ADHD FYP Backend running ✅");

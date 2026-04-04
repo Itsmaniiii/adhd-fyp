@@ -9,17 +9,16 @@ import Tracker from "./Pages/Tracker";
 import Questionnaire from "./Pages/Questionnaire";
 import SeverityCheck from './Pages/SeverityCheck';
 import Chatbot from "./Pages/Chatbot";
+import { isAuthenticated } from "./api/auth";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
-  return token ? children : <Navigate to="/login" />;
+  return isAuthenticated() ? children : <Navigate to="/login" />;
 };
 
 // Home Route - Check token
 const HomeRoute = () => {
-  const token = localStorage.getItem("token");
-  return token ? <Home /> : <Navigate to="/login" />;
+  return isAuthenticated() ? <Home /> : <Navigate to="/login" />;
 };
 
 function App() {

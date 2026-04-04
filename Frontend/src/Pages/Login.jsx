@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
+import { setToken } from "../api/auth";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -65,7 +66,7 @@ const Login = () => {
       });
 
       // Save token
-      localStorage.setItem("token", res.data.token);
+      setToken(res.data.token);
 
       // Navigate to home
       navigate("/");
