@@ -180,7 +180,7 @@ const handleVoiceSend = useCallback(async (text) => {
   } finally {
     setIsLoading(false);
   }
-}, []);
+}, [messages]);
 
 const speakText = (text) => {
   // Check if speech synthesis is supported
