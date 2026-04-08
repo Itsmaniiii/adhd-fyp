@@ -7,167 +7,246 @@ const Questionnaire = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [hoveredOption, setHoveredOption] = useState(null);
 
-  // Questions based on ADHD dataset
   const questions = [
-    {
-      id: 1,
-      text: "What is your age?",
-      type: "single",
-      icon: "🎂",
-      options: [
-        { value: "3-5", label: "3-5 years", subtext: "Child", score: 0 },
-        { value: "6-12", label: "6-12 years", subtext: "Primary School", score: 1 },
-        { value: "13-17", label: "13-17 years", subtext: "Teenager", score: 2 },
-        { value: "18-25", label: "18-25 years", subtext: "Young Adult", score: 3 },
-        { value: "26-40", label: "26-40 years", subtext: "Adult", score: 2 },
-        { value: "41+", label: "41+ years", subtext: "Mature Adult", score: 1 }
-      ]
-    },
-    {
-      id: 2,
-      text: "What is your gender?",
-      type: "single",
-      icon: "👤",
-      options: [
-        { value: "male", label: "Male", subtext: "♂️", score: 1 },
-        { value: "female", label: "Female", subtext: "♀️", score: 2 }
-      ]
-    },
-    {
-      id: 3,
-      text: "What is your educational level?",
-      type: "single",
-      icon: "🎓",
-      options: [
-        { value: "kindergarten", label: "Kindergarten", subtext: "Early education", score: 0 },
-        { value: "primary", label: "Primary School", subtext: "Grades 1-5", score: 1 },
-        { value: "middle", label: "Middle School", subtext: "Grades 6-8", score: 2 },
-        { value: "secondary", label: "Secondary School", subtext: "Grades 9-12", score: 3 },
-        { value: "university", label: "University", subtext: "Higher education", score: 4 },
-        { value: "working", label: "Working Professional", subtext: "Employed", score: 5 },
-        { value: "not_working", label: "Not Working", subtext: "Seeking opportunities", score: 6 }
-      ]
-    },
-    {
-      id: 4,
-      text: "Do you have a family history of ADHD or mental health conditions?",
-      type: "single",
-      icon: "👨‍👩‍👧",
-      options: [
-        { value: "yes", label: "Yes", subtext: "Family history present", score: 1 },
-        { value: "no", label: "No", subtext: "No family history", score: 0 },
-        { value: "unknown", label: "Unknown", subtext: "Not sure", score: 0 }
-      ]
-    },
-    {
-      id: 5,
-      text: "How many hours do you sleep on average per night?",
-      type: "single",
-      icon: "😴",
-      options: [
-        { value: "7-9", label: "7-9 hours", subtext: "Optimal sleep", score: 0 },
-        { value: "9-11", label: "9-11 hours", subtext: "Extended sleep", score: 1 },
-        { value: "5-7", label: "5-7 hours", subtext: "Reduced sleep", score: 2 },
-        { value: "less_5", label: "Less than 5 hours", subtext: "Severe sleep deprivation", score: 3 },
-        { value: "more_11", label: "More than 11 hours", subtext: "Excessive sleep", score: 2 }
-      ]
-    },
-    {
-      id: 6,
-      text: "How many hours do you spend on daily activities?",
-      type: "single",
-      icon: "🏃",
-      options: [
-        { value: "0-3", label: "0-3 hours", subtext: "Very Low activity", score: 3 },
-        { value: "4-6", label: "4-6 hours", subtext: "Low activity", score: 2 },
-        { value: "7-9", label: "7-9 hours", subtext: "Moderate activity", score: 1 },
-        { value: "10-12", label: "10-12 hours", subtext: "High activity", score: 0 }
-      ]
-    },
-    {
-      id: 7,
-      text: "How many hours do you use phone daily?",
-      type: "single",
-      icon: "📱",
-      options: [
-        { value: "0-2", label: "0-2 hours", subtext: "Minimal use", score: 0 },
-        { value: "3-4", label: "3-4 hours", subtext: "Moderate use", score: 1 },
-        { value: "5-6", label: "5-6 hours", subtext: "High use", score: 2 },
-        { value: "7-8", label: "7-8 hours", subtext: "Very high use", score: 3 },
-        { value: "9+", label: "9+ hours", subtext: "Excessive use", score: 4 }
-      ]
-    },
-    {
-      id: 8,
-      text: "How many hours do you walk/run daily?",
-      type: "single",
-      icon: "🚶",
-      options: [
-        { value: "0-0.5", label: "0-0.5 hours", subtext: "Sedentary", score: 3 },
-        { value: "0.6-1", label: "0.6-1 hour", subtext: "Low activity", score: 2 },
-        { value: "1.1-1.5", label: "1.1-1.5 hours", subtext: "Moderate activity", score: 1 },
-        { value: "1.6+", label: "1.6+ hours", subtext: "Active lifestyle", score: 0 }
-      ]
-    },
-    {
-      id: 9,
-      text: "Do you have difficulty organizing tasks?",
-      type: "single",
-      icon: "📋",
-      options: [
-        { value: "no", label: "No", subtext: "Well organized", score: 0 },
-        { value: "yes", label: "Yes", subtext: "Significant difficulty", score: 1 }
-      ]
-    },
-    {
-      id: 10,
-      text: "How is your focus score while watching videos?",
-      type: "single",
-      icon: "🎯",
-      options: [
-        { value: "8-10", label: "8-10", subtext: "Excellent focus", score: 0 },
-        { value: "5-7", label: "5-7", subtext: "Good focus", score: 1 },
-        { value: "3-4", label: "3-4", subtext: "Poor focus", score: 2 },
-        { value: "0-2", label: "0-2", subtext: "Very poor focus", score: 3 }
-      ]
-    },
-    {
-      id: 11,
-      text: "How many cups of coffee/tea do you consume daily?",
-      type: "single",
-      icon: "☕",
-      options: [
-        { value: "0", label: "0 cups", subtext: "No caffeine", score: 0 },
-        { value: "1-2", label: "1-2 cups", subtext: "Low caffeine", score: 1 },
-        { value: "3-4", label: "3-4 cups", subtext: "Moderate caffeine", score: 2 },
-        { value: "5-6", label: "5-6 cups", subtext: "High caffeine", score: 3 },
-        { value: "7+", label: "7+ cups", subtext: "Excessive caffeine", score: 4 }
-      ]
-    },
-    {
-      id: 12,
-      text: "Do you have learning difficulties?",
-      type: "single",
-      icon: "📚",
-      options: [
-        { value: "no", label: "No", subtext: "No difficulties", score: 0 },
-        { value: "yes", label: "Yes", subtext: "Significant difficulties", score: 1 }
-      ]
-    },
-    {
-      id: 13,
-      text: "How would you rate your anxiety/depression levels?",
-      type: "single",
-      icon: "😰",
-      options: [
-        { value: "0", label: "None (0)", subtext: "No symptoms", score: 0 },
-        { value: "1", label: "Mild (1)", subtext: "Occasional symptoms", score: 1 },
-        { value: "2", label: "Moderate (2)", subtext: "Frequent symptoms", score: 2 },
-        { value: "3", label: "Severe (3)", subtext: "Severe symptoms", score: 3 }
-      ]
-    }
-  ];
-
+  {
+    id: 1,
+    text: "What is your age?",
+    type: "single",
+    icon: "🎂",
+    options: [
+      { value: 6, label: "6-9 years", subtext: "Child", score: 0 },
+      { value: 10, label: "10-12 years", subtext: "Pre-teen", score: 1 },
+      { value: 13, label: "13-15 years", subtext: "Early Teen", score: 2 },
+      { value: 16, label: "16-17 years", subtext: "Late Teen", score: 3 },
+    ]
+  },
+  {
+    id: 2,
+    text: "What is your gender?",
+    type: "single",
+    icon: "👤",
+    options: [
+      { value: "M", label: "Male", subtext: "♂️", score: 1 },
+      { value: "F", label: "Female", subtext: "♀️", score: 2 }
+    ]
+  },
+  {
+    id: 3,
+    text: "Fails to give close attention to details or makes careless mistakes",
+    type: "scale",
+    icon: "🔍",
+    options: [
+      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
+      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
+      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
+      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
+    ]
+  },
+  {
+    id: 4,
+    text: "Difficulty sustaining attention in tasks or play",
+    type: "scale",
+    icon: "🎯",
+    options: [
+      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
+      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
+      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
+      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
+    ]
+  },
+  {
+    id: 5,
+    text: "Does not seem to listen when spoken to directly",
+    type: "scale",
+    icon: "👂",
+    options: [
+      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
+      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
+      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
+      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
+    ]
+  },
+  {
+    id: 6,
+    text: "Does not follow through on instructions / fails to finish tasks",
+    type: "scale",
+    icon: "📝",
+    options: [
+      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
+      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
+      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
+      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
+    ]
+  },
+  {
+    id: 7,
+    text: "Difficulty organizing tasks and activities",
+    type: "scale",
+    icon: "📋",
+    options: [
+      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
+      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
+      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
+      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
+    ]
+  },
+  {
+    id: 8,
+    text: "Avoids or dislikes tasks requiring sustained mental effort",
+    type: "scale",
+    icon: "🧠",
+    options: [
+      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
+      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
+      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
+      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
+    ]
+  },
+  {
+    id: 9,
+    text: "Loses things necessary for tasks",
+    type: "scale",
+    icon: "🔑",
+    options: [
+      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
+      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
+      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
+      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
+    ]
+  },
+  {
+    id: 10,
+    text: "Easily distracted by external stimuli",
+    type: "scale",
+    icon: "🎪",
+    options: [
+      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
+      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
+      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
+      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
+    ]
+  },
+  {
+    id: 11,
+    text: "Forgetful in daily activities",
+    type: "scale",
+    icon: "📅",
+    options: [
+      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
+      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
+      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
+      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
+    ]
+  },
+  {
+    id: 12,
+    text: "Fidgets or squirms in seat",
+    type: "scale",
+    icon: "💺",
+    options: [
+      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
+      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
+      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
+      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
+    ]
+  },
+  {
+    id: 13,
+    text: "Leaves seat when remaining seated is expected",
+    type: "scale",
+    icon: "🚶",
+    options: [
+      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
+      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
+      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
+      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
+    ]
+  },
+  {
+    id: 14,
+    text: "Runs or climbs excessively in inappropriate situations",
+    type: "scale",
+    icon: "🏃",
+    options: [
+      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
+      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
+      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
+      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
+    ]
+  },
+  {
+    id: 15,
+    text: "Unable to play or engage quietly",
+    type: "scale",
+    icon: "🎮",
+    options: [
+      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
+      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
+      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
+      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
+    ]
+  },
+  {
+    id: 16,
+    text: "'On the go' or acts driven by a motor",
+    type: "scale",
+    icon: "⚡",
+    options: [
+      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
+      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
+      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
+      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
+    ]
+  },
+  {
+    id: 17,
+    text: "Talks excessively",
+    type: "scale",
+    icon: "💬",
+    options: [
+      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
+      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
+      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
+      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
+    ]
+  },
+  {
+    id: 18,
+    text: "Blurts out answers prematurely",
+    type: "scale",
+    icon: "🗣️",
+    options: [
+      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
+      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
+      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
+      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
+    ]
+  },
+  {
+    id: 19,
+    text: "Difficulty waiting turn",
+    type: "scale",
+    icon: "⏳",
+    options: [
+      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
+      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
+      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
+      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
+    ]
+  },
+  {
+    id: 20,
+    text: "Interrupts or intrudes on others",
+    type: "scale",
+    icon: "🚫",
+    options: [
+      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
+      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
+      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
+      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
+    ]
+  }
+];
   const handleAnswer = (questionId, value, score) => {
     setAnswers(prev => ({
       ...prev,
@@ -215,7 +294,7 @@ const Questionnaire = () => {
       <div style={styles.header}>
         <div style={styles.headerIcon}>🧠</div>
         <h1 style={styles.title}>ADHD Self Assessment</h1>
-        <p style={styles.subtitle}>Please answer all questions honestly for accurate assessment</p>
+        <p style={styles.subtitle}>Based on DSM-5 ADHD diagnostic criteria</p>
       </div>
 
       {/* Progress Section */}
