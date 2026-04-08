@@ -13,7 +13,6 @@ const initDb = async () => {
       const sql = fs.readFileSync(path.join(sqlFolder, file), "utf-8");
       await pool.query(sql);
     }
-    console.log("DB Connected ✅");
   } catch (err) {
     console.error("❌ DB init failed:", err.message);
   }
