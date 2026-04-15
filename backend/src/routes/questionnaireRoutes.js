@@ -1,10 +1,13 @@
 import express from "express";
-import {submitQuestionnaire,getQuestionnaireByChild } from "../controllers/questionnaireController.js";
+import {submitQuestionnaire, getQuestionnaireByUser } from "../controllers/questionnaireController.js";
 import authMiddleware from "../../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/", authMiddleware, submitQuestionnaire);
-router.get("/:childId", authMiddleware, getQuestionnaireByChild);
+// POST /api/questionnaire/submit - Save user's questionnaire answers
+router.post("/submit", authMiddleware, submitQuestionnaire);
+
+// GET /api/questionnaire/history/:userId - Get all questionnaire responses for a user
+router.get("/history/:userId", authMiddleware, getQuestionnaireByUser);
 
 export default router;

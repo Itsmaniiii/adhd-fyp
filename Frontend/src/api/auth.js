@@ -1,10 +1,15 @@
 const TOKEN_KEY = "token";
 const EXPIRY_KEY = "token_expiry";
+const USER_ID_KEY = "userId";
 
 export const setToken = (token, expiresIn = 3600000) => { // Default 1 hour
   const expiry = Date.now() + expiresIn;
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(EXPIRY_KEY, expiry.toString());
+};
+
+export const setUserId = (userId) => {
+  localStorage.setItem(USER_ID_KEY, userId.toString());
 };
 
 export const getToken = () => {
@@ -15,9 +20,15 @@ export const getToken = () => {
     // Token expired, remove it
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(EXPIRY_KEY);
+    localStorage.removeItem(USER_ID_KEY);
+    console.warn("⚠️ Token expired - cleared from localStorage");
     return null;
   }
   return token;
+};
+
+export const getUserId = () => {
+  return localStorage.getItem(USER_ID_KEY);
 };
 
 export const isAuthenticated = () => {
@@ -27,4 +38,5 @@ export const isAuthenticated = () => {
 export const logout = () => {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(EXPIRY_KEY);
+  localStorage.removeItem(USER_ID_KEY);
 };

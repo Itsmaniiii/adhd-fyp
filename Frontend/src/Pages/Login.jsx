@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
-import { setToken } from "../api/auth";
+import { setToken, setUserId } from "../api/auth";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -65,12 +65,18 @@ const Login = () => {
         password: formData.password,
       });
 
-      // Save token
+      // Save token and user ID
       setToken(res.data.token);
+      if (res.data.userId) {
+        setUserId(res.data.userId);
+      }
+
+      console.log("✅ Login successful - Token and userId stored");
 
       // Navigate to home
       navigate("/");
     } catch (error) {
+      console.error("❌ Login error:", error.response?.data);
       setErrors({
         submit: error.response?.data?.message || "Login failed. Please try again.",
       });
@@ -136,7 +142,6 @@ const Login = () => {
                 Email Address
               </label>
               <div className="input-container">
-                <span className="input-icon">✉️</span>
                 <input
                   type="email"
                   id="email"

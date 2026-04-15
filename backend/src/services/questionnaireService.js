@@ -1,16 +1,27 @@
 import * as questionnaireRepo from "../repositories/questionnaireRepository.js";
 
 export const submitQuestionnaire = async (payload) => {
-  const records = payload.questions.map(q => ({
-    child_id: payload.child_id,
-    question: q.question,
-    answer: q.answer,
-    // id removed — DB auto-generate karega
-  }));
+  try {
+    // Save responses to database
+    const records = payload.questions.map(q => ({
+      user_id: payload.user_id,
+      question: q.question,
+      answer: q.answer, // Save the answer value (string)
+      score: parseInt(q.score) || 0 // Save the calculated score as integer
+    }));
 
-  return await questionnaireRepo.insertResponses(records);
+    const savedResponses = await questionnaireRepo.insertResponses(records);
+
+    return {
+      success: true,
+      message: "Questionnaire submitted successfully",
+      responses: savedResponses
+    };
+  } catch (err) {
+    throw new Error(`Failed to submit questionnaire: ${err.message}`);
+  }
 };
 
-export const getQuestionnaireByChild = async (childId) => {
-  return await questionnaireRepo.getQuestionnaireByChild(childId);
+export const getQuestionnaireByUser = async (userId) => {
+  return await questionnaireRepo.getQuestionnaireByUser(userId);
 };
