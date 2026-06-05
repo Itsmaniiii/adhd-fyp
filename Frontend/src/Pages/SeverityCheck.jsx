@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from "react";
-import SeverityMeter from "../component/SeverityMeter";
+import SeverityChecker from "../component/SeverityMeter"; // Updated component
+import { useLocation } from "react-router-dom";
 
 
+const TIMEFRAMES_DATA = {
+  week: [5, 7, 4, 6, 5, 8, 6],
+  month: [5, 7, 4, 6, 5, 8, 6, 5, 7, 6, 5, 4, 6, 7, 5, 6, 4, 7, 6, 5, 4, 6, 7, 5, 6, 4, 7, 6, 5, 6],
+  quarter: [5, 6, 5, 7, 6, 5, 4, 6, 7, 5, 6, 4]
+};
 export default function SeverityCheck() {
-  const [score, setScore] = useState(5);
+  const location = useLocation();
+
+  // Receive data from navigation
+  const { answers, questions, prediction } = location.state || {};
+  const [score, setScore] = useState(0);
   const [history, setHistory] = useState([5, 7, 4, 6, 5, 8]);
   const [selectedTimeframe, setSelectedTimeframe] = useState('week');
   const [notes, setNotes] = useState("");
@@ -15,17 +25,57 @@ export default function SeverityCheck() {
     hyperactivity: 3
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [mlResult, setMlResult] = useState(null);
 
-  // Mock data for different timeframes
-  const timeframes = {
-    week: [5, 7, 4, 6, 5, 8, 6],
-    month: [5, 7, 4, 6, 5, 8, 6, 5, 7, 6, 5, 4, 6, 7, 5, 6, 4, 7, 6, 5, 4, 6, 7, 5, 6, 4, 7, 6, 5, 6],
-    quarter: [5, 6, 5, 7, 6, 5, 4, 6, 7, 5, 6, 4]
-  };
+  // Calculate severity score from questionnaire answers
+    useEffect(() => {
+    if (prediction) {
+      console.log("🤖 ML Prediction:", prediction);
 
+      setMlResult(prediction);
+
+      const probabilityScore = Math.round((prediction.probability || 0) * 10);
+      setScore(probabilityScore);
+    }
+  }, [prediction]);
   useEffect(() => {
-    setHistory(timeframes[selectedTimeframe]);
-  }, [selectedTimeframe]);
+    if (!prediction && answers) {
+      const totalScore = Object.values(answers).reduce((sum, a) => sum + (a.score || 0), 0);
+      const normalized = Math.round((totalScore / 60) * 10);
+      setScore(normalized);
+    }
+  }, [prediction, answers]);
+  useEffect(() => {
+    if (answers && questions) {
+      const categoryMap = {
+        focus: "Inattention",
+        hyperactivity: "Hyperactivity",
+        impulsivity: "Impulsivity",
+        emotional: "Impairment",
+        organization: "Inattention"
+      };
+
+      // "prev" use karne se dependency ki zaroorat khatam ho jati hai
+      setSymptoms(prev => {
+        const newSymptoms = { ...prev };
+        Object.keys(categoryMap).forEach(symptomKey => {
+          const sectionName = categoryMap[symptomKey];
+          const sectionQuestions = questions.filter(q => q.section === sectionName);
+          const sectionScores = sectionQuestions.map(q => answers[q.id]?.score || 0);
+
+          if (sectionScores.length > 0) {
+            const totalObtained = sectionScores.reduce((a, b) => a + b, 0);
+            const maxPossible = sectionScores.length * 3;
+            newSymptoms[symptomKey] = Math.round((totalObtained / maxPossible) * 10);
+          }
+        });
+        return newSymptoms;
+      });
+    }
+  }, [answers, questions]); 
+  useEffect(() => {
+    setHistory(TIMEFRAMES_DATA[selectedTimeframe]); 
+}, [selectedTimeframe]);
 
   const handleScoreChange = (newScore) => {
     setIsLoading(true);
@@ -55,10 +105,18 @@ export default function SeverityCheck() {
     alert('Assessment saved successfully!');
   };
 
-  const getSeverityLevel = (score) => {
-    if (score <= 3) return { level: "Mild", color: "#10b981", description: "Minimal impact on daily functioning" };
-    if (score <= 6) return { level: "Moderate", color: "#f59e0b", description: "Noticeable impact, manageable with strategies" };
-    return { level: "Severe", color: "#ef4444", description: "Significant impact, professional support recommended" };
+  const getSeverityLevel = () => {
+    if (!mlResult) return { level: "Loading", color: "#999", description: "Analyzing..." };
+
+    if (mlResult.prediction === "No ADHD") {
+      return { level: "Low Risk", color: "#10b981", description: "No major issues" };
+    }
+
+    if (mlResult.probability < 0.6) {
+      return { level: "Moderate Risk", color: "#f59e0b", description: "Some symptoms" };
+    }
+
+    return { level: "High Risk", color: "#ef4444", description: "Strong symptoms" };
   };
 
   const getAverageScore = () => {
@@ -66,8 +124,7 @@ export default function SeverityCheck() {
     return (sum / history.length).toFixed(1);
   };
 
-  const severity = getSeverityLevel(score);
-
+  const severity = getSeverityLevel();
   return (
     <div className="severity-check-page">
       {/* Header Section */}
@@ -86,6 +143,19 @@ export default function SeverityCheck() {
           <div className="stat-card">
             <span className="stat-label">Average</span>
             <span className="stat-value">{getAverageScore()}/10</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-label">AI Prediction</span>
+            <span className="stat-value">
+              {mlResult?.prediction || "Loading..."}
+            </span>
+          </div>
+
+          <div className="stat-card">
+            <span className="stat-label">Confidence</span>
+            <span className="stat-value">
+              {mlResult ? Math.round(mlResult.probability * 100) + "%" : "--"}
+            </span>
           </div>
           <div className="stat-card severity-level" style={{ backgroundColor: `${severity.color}15` }}>
             <span className="stat-label">Level</span>
@@ -116,7 +186,7 @@ export default function SeverityCheck() {
                 </div>
               ) : (
                 <>
-                  <SeverityMeter score={score} onScoreChange={handleScoreChange} />
+                  <SeverityChecker answers={answers} questions={questions} />
                   <div className="severity-info">
                     <div className="severity-level-display" style={{ color: severity.color }}>
                       <span className="level-icon">📊</span>
