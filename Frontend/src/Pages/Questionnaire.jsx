@@ -7,7 +7,7 @@ const Questionnaire = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [hoveredOption, setHoveredOption] = useState(null);
 
-  const questions = [
+ const questions = [
   {
     id: 1,
     text: "What is your age?",
@@ -32,9 +32,10 @@ const Questionnaire = () => {
   },
   {
     id: 3,
-    text: "Fails to give close attention to details or makes careless mistakes",
+    text: "How often do you make careless mistakes or miss details?",
     type: "scale",
     icon: "🔍",
+    section: "Inattention",
     options: [
       { value: 0, label: "Never", subtext: "Not at all", score: 0 },
       { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
@@ -44,9 +45,10 @@ const Questionnaire = () => {
   },
   {
     id: 4,
-    text: "Difficulty sustaining attention in tasks or play",
+    text: "Do you have difficulty sustaining attention on tasks or activities?",
     type: "scale",
     icon: "🎯",
+    section: "Inattention",
     options: [
       { value: 0, label: "Never", subtext: "Not at all", score: 0 },
       { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
@@ -56,9 +58,10 @@ const Questionnaire = () => {
   },
   {
     id: 5,
-    text: "Does not seem to listen when spoken to directly",
+    text: "Do you struggle with organizing tasks and following through on instructions?",
     type: "scale",
-    icon: "👂",
+    icon: "📋",
+    section: "Inattention",
     options: [
       { value: 0, label: "Never", subtext: "Not at all", score: 0 },
       { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
@@ -68,9 +71,10 @@ const Questionnaire = () => {
   },
   {
     id: 6,
-    text: "Does not follow through on instructions / fails to finish tasks",
+    text: "Are you easily distracted or forgetful in daily activities?",
     type: "scale",
-    icon: "📝",
+    icon: "🎪",
+    section: "Inattention",
     options: [
       { value: 0, label: "Never", subtext: "Not at all", score: 0 },
       { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
@@ -80,9 +84,10 @@ const Questionnaire = () => {
   },
   {
     id: 7,
-    text: "Difficulty organizing tasks and activities",
+    text: "Do you fidget, squirm, or have trouble staying seated?",
     type: "scale",
-    icon: "📋",
+    icon: "💺",
+    section: "Hyperactivity",
     options: [
       { value: 0, label: "Never", subtext: "Not at all", score: 0 },
       { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
@@ -92,9 +97,10 @@ const Questionnaire = () => {
   },
   {
     id: 8,
-    text: "Avoids or dislikes tasks requiring sustained mental effort",
+    text: "Do you feel constantly 'on the go' or have difficulty playing quietly?",
     type: "scale",
-    icon: "🧠",
+    icon: "⚡",
+    section: "Hyperactivity",
     options: [
       { value: 0, label: "Never", subtext: "Not at all", score: 0 },
       { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
@@ -104,9 +110,10 @@ const Questionnaire = () => {
   },
   {
     id: 9,
-    text: "Loses things necessary for tasks",
+    text: "Do you talk excessively or blurt out answers before questions are completed?",
     type: "scale",
-    icon: "🔑",
+    icon: "💬",
+    section: "Impulsivity",
     options: [
       { value: 0, label: "Never", subtext: "Not at all", score: 0 },
       { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
@@ -116,129 +123,10 @@ const Questionnaire = () => {
   },
   {
     id: 10,
-    text: "Easily distracted by external stimuli",
-    type: "scale",
-    icon: "🎪",
-    options: [
-      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
-      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
-      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
-      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
-    ]
-  },
-  {
-    id: 11,
-    text: "Forgetful in daily activities",
-    type: "scale",
-    icon: "📅",
-    options: [
-      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
-      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
-      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
-      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
-    ]
-  },
-  {
-    id: 12,
-    text: "Fidgets or squirms in seat",
-    type: "scale",
-    icon: "💺",
-    options: [
-      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
-      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
-      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
-      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
-    ]
-  },
-  {
-    id: 13,
-    text: "Leaves seat when remaining seated is expected",
-    type: "scale",
-    icon: "🚶",
-    options: [
-      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
-      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
-      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
-      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
-    ]
-  },
-  {
-    id: 14,
-    text: "Runs or climbs excessively in inappropriate situations",
-    type: "scale",
-    icon: "🏃",
-    options: [
-      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
-      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
-      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
-      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
-    ]
-  },
-  {
-    id: 15,
-    text: "Unable to play or engage quietly",
-    type: "scale",
-    icon: "🎮",
-    options: [
-      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
-      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
-      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
-      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
-    ]
-  },
-  {
-    id: 16,
-    text: "'On the go' or acts driven by a motor",
-    type: "scale",
-    icon: "⚡",
-    options: [
-      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
-      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
-      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
-      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
-    ]
-  },
-  {
-    id: 17,
-    text: "Talks excessively",
-    type: "scale",
-    icon: "💬",
-    options: [
-      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
-      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
-      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
-      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
-    ]
-  },
-  {
-    id: 18,
-    text: "Blurts out answers prematurely",
-    type: "scale",
-    icon: "🗣️",
-    options: [
-      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
-      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
-      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
-      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
-    ]
-  },
-  {
-    id: 19,
-    text: "Difficulty waiting turn",
+    text: "Do you have difficulty waiting your turn or interrupt others?",
     type: "scale",
     icon: "⏳",
-    options: [
-      { value: 0, label: "Never", subtext: "Not at all", score: 0 },
-      { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
-      { value: 2, label: "Sometimes", subtext: "Moderately often", score: 2 },
-      { value: 3, label: "Often", subtext: "Very frequently", score: 3 }
-    ]
-  },
-  {
-    id: 20,
-    text: "Interrupts or intrudes on others",
-    type: "scale",
-    icon: "🚫",
+    section: "Impulsivity",
     options: [
       { value: 0, label: "Never", subtext: "Not at all", score: 0 },
       { value: 1, label: "Rarely", subtext: "Occasionally", score: 1 },
