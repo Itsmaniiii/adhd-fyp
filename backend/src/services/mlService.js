@@ -3,7 +3,7 @@ import axios from "axios";
 export const callMLService = async (features) => {
   try {
     // 127.0.0.1 use karna localhost se zyada reliable hota hai networking mein
-    const res = await axios.post("http://127.0.0.1:5002/predict", {
+    const res = await axios.post("http://127.0.0.1:5001/predict", {
       features: features
     });
     return res.data;
