@@ -1,41 +1,55 @@
 import React from "react";
 
-const SeverityChecker = ({ answers, questions }) => {
+const SeverityChecker = ({ answers, questions, mlResult, score: propScore }) => {
   const calculateSeverity = () => {
-    if (!answers || !questions) return { level: "Unknown", score: 0, description: "No data available" };
+    if (!answers || !questions) {
+      return { level: "Unknown", score: 0, totalScore: 0, color: "#999", description: "No data available" };
+    }
 
     // Calculate total score from questionnaire answers
-    const totalScore = Object.values(answers).reduce((sum, answer) => {
-      return sum + (answer.score || 0);
-    }, 0);
+    let totalScore = 0;
+    let maxPossible = 0;
+    
+    Object.values(answers).forEach(answer => {
+      if (answer && answer.score !== undefined) {
+        totalScore += answer.score;
+        maxPossible += 3;
+      }
+    });
 
-    // Convert to 1-10 scale for severity meter
-    const normalizedScore = Math.min(Math.max(Math.round((totalScore / 60) * 10), 1), 10);
+    // Use prop score if provided, otherwise calculate
+    let normalizedScore = propScore;
+    if (!normalizedScore && maxPossible > 0) {
+      normalizedScore = Math.min(Math.max(Math.round((totalScore / maxPossible) * 10), 1), 10);
+    }
 
-    // Determine severity level based on total score
+    // Determine severity level
     let level, color, description;
-    if (totalScore <= 15) {
+    const percentage = maxPossible > 0 ? (totalScore / maxPossible) * 100 : 0;
+    
+    if (percentage <= 25) {
       level = "Low Risk";
-      color = "#10b981"; // green
+      color = "#10b981";
       description = "Minimal ADHD indicators. Maintain healthy lifestyle habits.";
-    } else if (totalScore <= 30) {
+    } else if (percentage <= 50) {
       level = "Moderate Risk";
-      color = "#f59e0b"; // orange
+      color = "#f59e0b";
       description = "Some ADHD indicators present. Consider lifestyle improvements.";
-    } else if (totalScore <= 45) {
+    } else if (percentage <= 75) {
       level = "High Risk";
-      color = "#ef4444"; // red
+      color = "#ef4444";
       description = "Multiple ADHD indicators. Professional consultation recommended.";
     } else {
       level = "Very High Risk";
-      color = "#dc2626"; // dark red
+      color = "#dc2626";
       description = "Strong ADHD indicators. Seek professional help immediately.";
     }
 
     return {
       level,
-      score: normalizedScore,
+      score: normalizedScore || 0,
       totalScore,
+      maxPossible,
       color,
       description
     };
@@ -55,28 +69,50 @@ const SeverityChecker = ({ answers, questions }) => {
       <h3 style={{ color: severity.color, marginBottom: "10px" }}>
         ADHD Risk Assessment: {severity.level}
       </h3>
-      <div style={{ fontSize: "24px", fontWeight: "bold", color: severity.color, marginBottom: "10px" }}>
-        Score: {severity.score}/10 (Total: {severity.totalScore})
+      
+      <div style={{ fontSize: "48px", fontWeight: "bold", color: severity.color, marginBottom: "10px" }}>
+        {severity.score}/10
       </div>
-      <p style={{ color: "#666", fontSize: "14px" }}>{severity.description}</p>
+      
+      <div style={{ fontSize: "14px", color: "#666", marginBottom: "10px" }}>
+        Total Score: {severity.totalScore} / {severity.maxPossible}
+      </div>
+      
+      <p style={{ color: "#666", fontSize: "14px", marginBottom: "15px" }}>
+        {severity.description}
+      </p>
 
-      {answers && questions && (
-        <div style={{ marginTop: "15px", textAlign: "left" }}>
-          <h4>Your Responses Summary:</h4>
-          {questions.map((q, index) => {
-            const userAnswer = answers[q.id];
-            if (!userAnswer) return null;
-
-            const selectedOption = q.options.find(opt => opt.value === userAnswer.value);
-            return (
-              <div key={q.id} style={{ marginBottom: "8px", fontSize: "12px" }}>
-                <strong>Q{index + 1}:</strong> {selectedOption?.label || userAnswer.value}
-                <span style={{ color: severity.color, marginLeft: "8px" }}>
-                  (Score: {userAnswer.score})
-                </span>
-              </div>
-            );
-          })}
+      {/* ML Result Display */}
+      {mlResult && mlResult.probability && (
+        <div style={{
+          marginTop: "10px",
+          padding: "10px",
+          backgroundColor: "#f0f0f0",
+          borderRadius: "8px"
+        }}>
+          <div style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>
+            🤖 AI Model Confidence
+          </div>
+          <div style={{
+            width: "100%",
+            height: "8px",
+            backgroundColor: "#e0e0e0",
+            borderRadius: "4px",
+            overflow: "hidden"
+          }}>
+            <div style={{
+              width: `${(mlResult.probability || 0) * 100}%`,
+              height: "100%",
+              backgroundColor: severity.color,
+              transition: "width 0.3s ease"
+            }} />
+          </div>
+          <div style={{ fontSize: "14px", fontWeight: "bold", marginTop: "5px", color: severity.color }}>
+            {Math.round((mlResult.probability || 0) * 100)}% Confidence
+          </div>
+          <div style={{ fontSize: "12px", color: "#666", marginTop: "5px" }}>
+            Prediction: {mlResult.prediction || "Loading..."}
+          </div>
         </div>
       )}
     </div>
