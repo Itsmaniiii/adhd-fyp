@@ -230,21 +230,63 @@ export default function SeverityCheck(props) {
 
   const severity = getSeverityLevel();
 
-  // Show loading if no answers
-  if (!answers || Object.keys(answers).length === 0) {
-    return (
-      <div style={{ textAlign: "center", padding: "50px" }}>
-        <h2>Loading assessment data...</h2>
-        <p>Please complete the questionnaire first.</p>
+  // ============================================
+// ✅ ENHANCED LOADING STATE
+// ============================================
+
+if (!answers || Object.keys(answers).length === 0) {
+  return (
+    <div className="severity-check-page">
+      {/* Header */}
+      <div className="severity-header">
+        <div className="header-content">
+          <h1 className="page-title">ADHD Severity Assessment</h1>
+          <p className="page-subtitle">Track your symptoms and monitor progress over time</p>
+        </div>
+      </div>
+      
+      {/* Enhanced Loading State */}
+      <div className="loading-state">
+        {/* Decorative Circles */}
+        <div className="deco-circle deco-circle-1"></div>
+        <div className="deco-circle deco-circle-2"></div>
+        
+        {/* Icon with Pulse */}
+        <div className="loading-icon">📋</div>
+        
+        <h2>No Assessment Data Found</h2>
+        <p className="subtitle">Let's get started with your assessment</p>
+        <div className="divider"></div>
+        
+        <p>
+          Please complete the questionnaire first to see your 
+          <br />
+          personalized severity assessment.
+        </p>
+        
+        {/* Enhanced Button with Arrow */}
         <button 
           onClick={() => window.location.href = '/questionnaire'}
-          style={{ padding: "10px 20px", background: "#667eea", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", marginTop: "20px" }}
+          className="btn-primary"
         >
           Go to Questionnaire
+          <span className="btn-arrow">→</span>
         </button>
+        
+        {/* Loading Dots (Decorative) */}
+        <div style={{ marginTop: "30px", opacity: 0.5 }}>
+          <span style={{ fontSize: "12px", color: "#999" }}>Ready when you are</span>
+          <div className="dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
+
 
   return (
     <div className="severity-check-page">
@@ -550,192 +592,6 @@ export default function SeverityCheck(props) {
         </button>
       </div>
 
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        .spinner {
-          width: 40px;
-          height: 40px;
-          border: 3px solid #f3f3f3;
-          border-top: 3px solid #667eea;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-          margin: 0 auto;
-        }
-        .loading-overlay {
-          text-align: center;
-          padding: 40px;
-        }
-        .stat-card {
-          background: white;
-          padding: 15px;
-          border-radius: 10px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          text-align: center;
-        }
-        .stat-label {
-          font-size: 12px;
-          color: #666;
-          display: block;
-        }
-        .stat-value {
-          font-size: 20px;
-          font-weight: bold;
-          color: #667eea;
-        }
-        .header-stats {
-          display: grid;
-          grid-template-columns: repeat(5, 1fr);
-          gap: 15px;
-          margin: 20px;
-        }
-        .severity-content {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 20px;
-          padding: 20px;
-        }
-        .severity-main-section, .severity-sidebar {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-        }
-        .severity-card, .symptoms-card, .history-card, .notes-card, .recommendations-card {
-          background: white;
-          padding: 20px;
-          border-radius: 10px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .card-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 15px;
-        }
-        .card-title {
-          margin: 0;
-          font-size: 18px;
-        }
-        .timeframe-selector {
-          display: flex;
-          gap: 5px;
-        }
-        .timeframe-btn {
-          padding: 5px 10px;
-          border: 1px solid #ddd;
-          background: white;
-          border-radius: 5px;
-          cursor: pointer;
-        }
-        .timeframe-btn.active {
-          background: #667eea;
-          color: white;
-          border-color: #667eea;
-        }
-        .chart-container {
-          display: flex;
-          align-items: flex-end;
-          height: 150px;
-          gap: 4px;
-        }
-        .chart-bar-container {
-          flex: 1;
-          text-align: center;
-        }
-        .chart-bar {
-          width: 100%;
-          transition: height 0.3s ease;
-          border-radius: 3px 3px 0 0;
-          cursor: pointer;
-        }
-        .chart-label {
-          font-size: 9px;
-          margin-top: 5px;
-          display: block;
-        }
-        .history-stats {
-          display: flex;
-          justify-content: space-between;
-          margin-top: 15px;
-        }
-        .symptom-item {
-          margin-bottom: 20px;
-        }
-        .symptom-header {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 5px;
-        }
-        .symptom-name {
-          font-weight: bold;
-          text-transform: capitalize;
-        }
-        .symptom-score {
-          color: #667eea;
-          font-weight: bold;
-        }
-        input[type="range"] {
-          width: 100%;
-        }
-        .notes-textarea {
-          width: 100%;
-          padding: 10px;
-          border-radius: 8px;
-          border: 1px solid #ddd;
-          margin-bottom: 10px;
-        }
-        .notes-footer {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .save-btn {
-          padding: 8px 16px;
-          background: #667eea;
-          color: white;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-        }
-        .recommendation-item {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          margin-bottom: 10px;
-        }
-        .severity-footer {
-          display: flex;
-          gap: 10px;
-          justify-content: flex-end;
-          padding: 15px;
-          border-top: 1px solid #ddd;
-          margin-top: 20px;
-        }
-        .action-btn {
-          padding: 8px 16px;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-        }
-        .action-btn.secondary {
-          background: #6c757d;
-          color: white;
-        }
-        .action-btn.primary {
-          background: #667eea;
-          color: white;
-        }
-        @media (max-width: 768px) {
-          .severity-content {
-            grid-template-columns: 1fr;
-          }
-          .header-stats {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-      `}</style>
     </div>
   );
 }

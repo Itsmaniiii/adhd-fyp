@@ -5350,3 +5350,258 @@ body, html {
   left: auto; 
   right: 20px; /* Yeh add karo */
 }
+/* Add these to your src/index.css file */
+
+/* ============================================
+   SEVERITY CHECK PAGE - ENHANCED LOADING STATE
+   ============================================ */
+
+/* Full page layout */
+.severity-check-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* Header stays on top */
+.severity-header {
+  flex-shrink: 0;
+  background: white;
+  padding: 20px 30px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* ============================================
+   ENHANCED LOADING STATE
+   ============================================ */
+
+.severity-check-page .loading-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px;
+  padding: 40px 20px;
+  text-align: center;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Loading Icon with Pulse Animation */
+.severity-check-page .loading-state .loading-icon {
+  font-size: 80px;
+  margin-bottom: 25px;
+  animation: pulse 2s ease-in-out infinite;
+  display: inline-block;
+  background: white;
+  width: 120px;
+  height: 120px;
+  line-height: 120px;
+  border-radius: 50%;
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.2);
+}
+
+.severity-check-page .loading-state h2 {
+  color: #2d3748;
+  margin-bottom: 12px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.severity-check-page .loading-state .subtitle {
+  color: #718096;
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.severity-check-page .loading-state .divider {
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 2px;
+  margin: 15px auto;
+}
+
+.severity-check-page .loading-state p {
+  color: #4a5568;
+  margin-bottom: 30px;
+  font-size: 16px;
+  max-width: 420px;
+  line-height: 1.6;
+}
+
+/* Enhanced Button */
+.severity-check-page .loading-state .btn-primary {
+  padding: 14px 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.severity-check-page .loading-state .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+}
+
+.severity-check-page .loading-state .btn-primary:active {
+  transform: translateY(0px);
+}
+
+.severity-check-page .loading-state .btn-primary .btn-arrow {
+  transition: transform 0.3s ease;
+}
+
+.severity-check-page .loading-state .btn-primary:hover .btn-arrow {
+  transform: translateX(5px);
+}
+
+/* Decorative Circles */
+.severity-check-page .loading-state .deco-circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.severity-check-page .loading-state .deco-circle-1 {
+  width: 200px;
+  height: 200px;
+  background: #667eea;
+  top: -50px;
+  right: -50px;
+}
+
+.severity-check-page .loading-state .deco-circle-2 {
+  width: 150px;
+  height: 150px;
+  background: #764ba2;
+  bottom: -30px;
+  left: -30px;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Loading Dots Animation */
+.severity-check-page .loading-state .dots {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: 5px;
+}
+
+.severity-check-page .loading-state .dots span {
+  width: 8px;
+  height: 8px;
+  background: #667eea;
+  border-radius: 50%;
+  display: inline-block;
+  animation: dotBounce 1.4s ease-in-out infinite both;
+}
+
+.severity-check-page .loading-state .dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+.severity-check-page .loading-state .dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+.severity-check-page .loading-state .dots span:nth-child(3) {
+  animation-delay: 0s;
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .severity-check-page .loading-state .loading-icon {
+    font-size: 60px;
+    width: 100px;
+    height: 100px;
+    line-height: 100px;
+  }
+  
+  .severity-check-page .loading-state h2 {
+    font-size: 22px;
+  }
+  
+  .severity-check-page .loading-state p {
+    font-size: 14px;
+    padding: 0 20px;
+  }
+  
+  .severity-check-page .loading-state .btn-primary {
+    padding: 12px 30px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .severity-check-page .loading-state .loading-icon {
+    font-size: 48px;
+    width: 80px;
+    height: 80px;
+    line-height: 80px;
+  }
+  
+  .severity-check-page .loading-state h2 {
+    font-size: 18px;
+  }
+  
+  .severity-check-page .loading-state .btn-primary {
+    padding: 10px 24px;
+    font-size: 13px;
+    width: 100%;
+    justify-content: center;
+  }
+}
