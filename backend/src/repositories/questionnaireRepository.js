@@ -40,3 +40,15 @@ export const getQuestionnaireByUser = async (userId) => {
     throw new Error(`Database error: ${err.message}`);
   }
 };
+
+export const getLatestQuestionnaireByUser = async (userId) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM questionnaire_response WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1",
+      [userId]
+    );
+    return result.rows[0] || null;
+  } catch (err) {
+    throw new Error(`Database error: ${err.message}`);
+  }
+};

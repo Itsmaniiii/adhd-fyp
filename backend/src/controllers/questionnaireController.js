@@ -51,3 +51,13 @@ export const getQuestionnaireByUser = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+export const getLatestQuestionnaireByUser = async (req, res) => {
+  try {
+    const userId = req.params.userId || req.user?.id;
+    const data = await questionnaireService.getLatestQuestionnaireByUser(userId);
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

@@ -2,6 +2,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { findUserByEmail, createUser } from "../repositories/userRepository.js";
 
+const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-key-change-in-production";
+
 export const signupService = async (name, email, password) => {
   const existingUser = await findUserByEmail(email);
   if (existingUser) {
@@ -24,8 +26,8 @@ export const loginService = async (email, password) => {
   }
 
   const token = jwt.sign(
-    { id: user.id, email: user.email }, // user.id = integer
-    process.env.JWT_SECRET,
+    { id: user.id, email: user.email },
+    JWT_SECRET,
     { expiresIn: "1h" }
   );
 

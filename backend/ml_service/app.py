@@ -343,10 +343,10 @@ if __name__ == '__main__':
     print(f"   Feature Names:       {'✅' if feature_names else '❌'} {'Loaded' if feature_names else 'Not Found'}")
     print(f"   Random Forest:       {'✅' if rf_model else '❌'} {'Loaded' if rf_model else 'Not Found'}")
     
-    print(f"\n📍 Server URL: http://localhost:5001")
-    print(f"📍 Health check: http://127.0.0.1:5001/health")
-    print(f"📍 Test endpoint: http://127.0.0.1:5001/test")
-    print(f"📍 Model info: http://127.0.0.1:5001/info")
+    print(f"\n📍 Server URL: http://localhost:5002")
+    print(f"📍 Health check: http://127.0.0.1:5002/health")
+    print(f"📍 Test endpoint: http://127.0.0.1:5002/test")
+    print(f"📍 Model info: http://127.0.0.1:5002/info")
     
     print(f"\n📋 Features Expected ({len(SYMPTOM_COLS)} symptom scores):")
     for i, col in enumerate(SYMPTOM_COLS, 1):
@@ -354,4 +354,4 @@ if __name__ == '__main__':
     
     print("✅ Server is ready! Pure model predictions - NO FALLBACK!")
     
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    app.run(host='0.0.0.0', port=5002, debug=True)

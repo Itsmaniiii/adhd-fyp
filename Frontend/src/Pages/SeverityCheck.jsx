@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SeverityChecker from "../component/SeverityMeter";
 import { useLocation } from "react-router-dom";
-import axios from "axios";
+import api from "../api/axios";
 
 const TIMEFRAMES_DATA = {
   week: [5, 7, 4, 6, 5, 8, 6],
@@ -17,7 +17,8 @@ export default function SeverityCheck(props) {
   const answers = props.answers || locationAnswers;
   const questions = props.questions || locationQuestions;
   
-  const [score, setScore] = useState(0);
+  const [localScore, setLocalScore] = useState(0);
+  const [aiConfidence, setAiConfidence] = useState(0);
   const [history, setHistory] = useState([5, 7, 4, 6, 5, 8]);
   const [selectedTimeframe, setSelectedTimeframe] = useState('week');
   const [notes, setNotes] = useState("");
@@ -45,11 +46,11 @@ export default function SeverityCheck(props) {
 
   // Calculate score from answers (local calculation)
   useEffect(() => {
-    if (answers && Object.keys(answers).length > 0) {
+    if (answers && Object.keys(answers).length > 0 && questions && questions.length > 0) {
       let totalScore = 0;
       let questionCount = 0;
-      
-      Object.values(answers).forEach(answer => {
+
+      Object.values(answers).forEach((answer) => {
         if (answer && typeof answer === 'object' && answer.score !== undefined) {
           totalScore += answer.score;
           questionCount++;
@@ -58,15 +59,31 @@ export default function SeverityCheck(props) {
           questionCount++;
         }
       });
-      
+
       if (questionCount > 0) {
-        const maxPossible = questionCount * 3;
-        const normalized = Math.round((totalScore / maxPossible) * 10);
-        setScore(normalized);
-        console.log(`📊 Local Score: ${normalized}/10 (${totalScore}/${maxPossible})`);
+        const maxPossible = questions.reduce((sum, q) => {
+          if (!Array.isArray(q.options)) return sum;
+          const optionScores = q.options.map((option) => option.score || 0);
+          const maxOptionScore = optionScores.length > 0 ? Math.max(...optionScores) : 0;
+          return sum + maxOptionScore;
+        }, 0);
+
+        if (maxPossible > 0) {
+          // One consistent local score formula:
+          // normalized = round((totalScore / maxPossible) * 10)
+          const normalized = Math.max(
+            0,
+            Math.min(10, Math.round((totalScore / maxPossible) * 10))
+          );
+          setLocalScore(normalized);
+
+          console.log(
+            `📊 Local Score: ${normalized}/10 (${totalScore}/${maxPossible})`
+          );
+        }
       }
     }
-  }, [answers]);
+  }, [answers, questions]);
 
   // Call ML API for prediction
   useEffect(() => {
@@ -88,29 +105,30 @@ export default function SeverityCheck(props) {
         console.log("📤 Sending to ML API - Features:", features);
         
         try {
-          const response = await axios.post('http://127.0.0.1:5001/predict', {
-            features: features
+          const response = await api.post('/predict/adhd', {
+            answers: Object.values(answers)
           });
           
           console.log("📥 ML API Response:", response.data);
           
-          if (response.data && response.data.success) {
+          if (response.data && response.data.success && response.data.prediction) {
+            const predictionData = response.data.prediction;
             setMlResult({
-              prediction: response.data.severity,
-              probability: response.data.confidence,
-              classIndex: response.data.class_index
+              prediction: predictionData.severity || predictionData.prediction,
+              probability: predictionData.confidence || 0,
+              classIndex: predictionData.class_index ?? predictionData.classIndex
             });
-            // Update score with ML confidence
-            const mlScore = Math.round(response.data.confidence * 10);
-            setScore(mlScore);
-            console.log("🤖 ML Score:", mlScore);
+            setAiConfidence(predictionData.confidence || 0);
+            console.log("🤖 AI prediction updated:", predictionData.severity);
           } else {
-            // Fallback - use local score
+            // Fallback uses local score only for label, without overwriting local score
+            const fallbackLabel = localScore <= 3 ? "Low Risk" : localScore <= 6 ? "Moderate Risk" : "High Risk";
             setMlResult({
-              prediction: score <= 3 ? "Low Risk" : score <= 6 ? "Moderate Risk" : "High Risk",
-              probability: score / 10,
-              classIndex: score <= 3 ? 0 : score <= 6 ? 1 : 2
+              prediction: fallbackLabel,
+              probability: localScore / 10,
+              classIndex: localScore <= 3 ? 0 : localScore <= 6 ? 1 : 2
             });
+            setAiConfidence(localScore / 10);
             console.log("📊 Using fallback prediction");
           }
         } catch (error) {
@@ -125,15 +143,14 @@ export default function SeverityCheck(props) {
     };
     
     callMLAPI();
-  }, [answers, score]);
+  }, [answers]);
 
   // Handle direct prediction prop
   useEffect(() => {
     if (prediction) {
       console.log("🤖 Direct ML Prediction:", prediction);
       setMlResult(prediction);
-      const probabilityScore = Math.round((prediction.probability || 0) * 10);
-      setScore(probabilityScore);
+      setAiConfidence(prediction.probability || 0);
     }
   }, [prediction]);
 
@@ -174,7 +191,7 @@ export default function SeverityCheck(props) {
   const handleScoreChange = (newScore) => {
     setIsLoading(true);
     setTimeout(() => {
-      setScore(newScore);
+      setLocalScore(newScore);
       setHistory(prev => [...prev.slice(-19), newScore]);
       setIsLoading(false);
     }, 500);
@@ -190,7 +207,7 @@ export default function SeverityCheck(props) {
   const handleSaveAssessment = () => {
     const assessment = {
       date: new Date().toISOString(),
-      score,
+      localScore,
       symptoms: { ...symptoms },
       notes,
       timeframe: selectedTimeframe,
@@ -207,7 +224,7 @@ export default function SeverityCheck(props) {
   };
 
   const getSeverityLevel = (scoreValue = null) => {
-    const currentScore = scoreValue !== null ? scoreValue : score;
+    const currentScore = scoreValue !== null ? scoreValue : localScore;
     
     if (isLoading && !mlResult) {
       return { level: "Analyzing...", color: "#999", description: "Loading AI prediction..." };
@@ -228,7 +245,7 @@ export default function SeverityCheck(props) {
     return (sum / history.length).toFixed(1);
   };
 
-  const severity = getSeverityLevel();
+  const severity = getSeverityLevel(localScore);
 
   // ============================================
 // ✅ ENHANCED LOADING STATE
@@ -301,7 +318,7 @@ if (!answers || Object.keys(answers).length === 0) {
         <div className="header-stats">
           <div className="stat-card">
             <span className="stat-label">Current Score</span>
-            <span className="stat-value" style={{ fontSize: "28px", fontWeight: "bold" }}>{score}/10</span>
+            <span className="stat-value" style={{ fontSize: "28px", fontWeight: "bold" }}>{localScore}/10</span>
           </div>
           <div className="stat-card">
             <span className="stat-label">Average</span>
@@ -310,13 +327,13 @@ if (!answers || Object.keys(answers).length === 0) {
           <div className="stat-card">
             <span className="stat-label">AI Prediction</span>
             <span className="stat-value" style={{ fontSize: "18px", fontWeight: "bold", color: severity.color }}>
-              {mlResult?.prediction || (score <= 3 ? "Low Risk" : score <= 6 ? "Moderate Risk" : "High Risk")}
+              {mlResult?.prediction || (localScore <= 3 ? "Low Risk" : localScore <= 6 ? "Moderate Risk" : "High Risk")}
             </span>
           </div>
           <div className="stat-card">
             <span className="stat-label">Confidence</span>
             <span className="stat-value">
-              {mlResult?.probability ? Math.round(mlResult.probability * 100) + "%" : isLoading ? "Loading..." : "--"}
+              {aiConfidence > 0 ? Math.round(aiConfidence * 100) + "%" : isLoading ? "Loading..." : "--"}
             </span>
           </div>
           <div className="stat-card severity-level" style={{ backgroundColor: `${severity.color}15` }}>
@@ -366,7 +383,7 @@ if (!answers || Object.keys(answers).length === 0) {
                     answers={answers} 
                     questions={questions} 
                     mlResult={mlResult} 
-                    score={score} 
+                    score={localScore} 
                   />
                   <div className="severity-info">
                     <div className="severity-level-display" style={{ color: severity.color }}>
@@ -377,12 +394,12 @@ if (!answers || Object.keys(answers).length === 0) {
                       </div>
                     </div>
                     <div className="score-slider">
-                      <label className="slider-label">Adjust Severity Score: <strong>{score}/10</strong></label>
+                      <label className="slider-label">Adjust Severity Score: <strong>{localScore}/10</strong></label>
                       <input
                         type="range"
                         min="1"
                         max="10"
-                        value={score}
+                        value={localScore}
                         onChange={(e) => handleScoreChange(parseInt(e.target.value))}
                         className="score-range"
                       />
@@ -431,8 +448,125 @@ if (!answers || Object.keys(answers).length === 0) {
           </div>
         </div>
 
-        {/* Sidebar with History and Notes */}
+        {/* Sidebar with Recommendations, Notes, and History */}
         <div className="severity-sidebar">
+          {/* Recommendations */}
+          <div className="recommendations-card">
+            <h2 className="card-title">Recommendations</h2>
+            <div className="recommendations-list">
+              {localScore <= 3 ? (
+                <>
+                  <div className="recommendation-item">
+                    <span className="rec-icon">✅</span>
+                    <span>Keep up your current routine and healthy habits.</span>
+                  </div>
+                  <div className="recommendation-item">
+                    <span className="rec-icon">📝</span>
+                    <span>Continue regular tracking to monitor small changes.</span>
+                  </div>
+                  <div className="recommendation-item">
+                    <span className="rec-icon">🧠</span>
+                    <span>Maintain good sleep, hydration, and focus-friendly habits.</span>
+                  </div>
+                  <div className="recommendation-item">
+                    <span className="rec-icon">📚</span>
+                    <span>Set small daily goals to build consistency without overwhelm.</span>
+                  </div>
+                  <div className="recommendation-item">
+                    <span className="rec-icon">☀️</span>
+                    <span>Spend time outdoors or in a calm environment to support attention.</span>
+                  </div>
+                  <div className="recommendation-item">
+                    <span className="rec-icon">🤝</span>
+                    <span>Stay connected with supportive people who encourage healthy routines.</span>
+                  </div>
+                </>
+              ) : localScore <= 6 ? (
+                <>
+                  <div className="recommendation-item">
+                    <span className="rec-icon">🧘</span>
+                    <span>Practice mindfulness or breathing exercises daily.</span>
+                  </div>
+                  <div className="recommendation-item">
+                    <span className="rec-icon">⏰</span>
+                    <span>Use time-blocking and short task breaks to stay organized.</span>
+                  </div>
+                  <div className="recommendation-item">
+                    <span className="rec-icon">📱</span>
+                    <span>Reduce distractions and set clear priorities each day.</span>
+                  </div>
+                  <div className="recommendation-item">
+                    <span className="rec-icon">🗂️</span>
+                    <span>Break big tasks into small steps to reduce stress and confusion.</span>
+                  </div>
+                  <div className="recommendation-item">
+                    <span className="rec-icon">🎯</span>
+                    <span>Use a checklist or planner to improve focus and follow-through.</span>
+                  </div>
+                  <div className="recommendation-item">
+                    <span className="rec-icon">😌</span>
+                    <span>Try calming routines before work, study, or stressful activities.</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="recommendation-item">
+                    <span className="rec-icon">👨‍⚕️</span>
+                    <span>Consider speaking with a healthcare professional for support.</span>
+                  </div>
+                  <div className="recommendation-item">
+                    <span className="rec-icon">💊</span>
+                    <span>Review symptoms and treatment options with your doctor.</span>
+                  </div>
+                  <div className="recommendation-item">
+                    <span className="rec-icon">🏃</span>
+                    <span>Increase physical activity and maintain a consistent routine.</span>
+                  </div>
+                  <div className="recommendation-item">
+                    <span className="rec-icon">🛌</span>
+                    <span>Prioritize sleep and rest, as fatigue can worsen symptoms.</span>
+                  </div>
+                  <div className="recommendation-item">
+                    <span className="rec-icon">🧑‍🏫</span>
+                    <span>Ask for academic, work, or home support if daily tasks feel overwhelming.</span>
+                  </div>
+                  <div className="recommendation-item">
+                    <span className="rec-icon">📞</span>
+                    <span>Reach out for counseling or structured support if needed.</span>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Notes Section */}
+          <div className="notes-card">
+            <h2 className="card-title">Assessment Notes</h2>
+            <p className="card-subtitle">Add context about today's assessment</p>
+            
+            <textarea
+              className="notes-textarea"
+              placeholder="Describe factors affecting today's score (sleep, stress, medication, etc.)..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={6}
+            />
+            
+            <div className="notes-footer">
+              <button 
+                className="save-btn"
+                onClick={handleSaveAssessment}
+                disabled={isLoading}
+              >
+                <span className="btn-icon">💾</span>
+                Save Assessment
+              </button>
+              <div className="char-count">
+                {notes.length}/500 characters
+              </div>
+            </div>
+          </div>
+
           {/* History Chart */}
           <div className="history-card">
             <div className="card-header">
@@ -494,83 +628,6 @@ if (!answers || Object.keys(answers).length === 0) {
                 <span className="stat-label">Trend</span>
                 <span className="stat-value trend-up">↗ Improving</span>
               </div>
-            </div>
-          </div>
-
-          {/* Notes Section */}
-          <div className="notes-card">
-            <h2 className="card-title">Assessment Notes</h2>
-            <p className="card-subtitle">Add context about today's assessment</p>
-            
-            <textarea
-              className="notes-textarea"
-              placeholder="Describe factors affecting today's score (sleep, stress, medication, etc.)..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={6}
-            />
-            
-            <div className="notes-footer">
-              <button 
-                className="save-btn"
-                onClick={handleSaveAssessment}
-                disabled={isLoading}
-              >
-                <span className="btn-icon">💾</span>
-                Save Assessment
-              </button>
-              <div className="char-count">
-                {notes.length}/500 characters
-              </div>
-            </div>
-          </div>
-
-          {/* Recommendations */}
-          <div className="recommendations-card">
-            <h2 className="card-title">Recommendations</h2>
-            <div className="recommendations-list">
-              {score <= 3 ? (
-                <>
-                  <div className="recommendation-item">
-                    <span className="rec-icon">✅</span>
-                    <span>Continue current strategies</span>
-                  </div>
-                  <div className="recommendation-item">
-                    <span className="rec-icon">📝</span>
-                    <span>Maintain regular tracking</span>
-                  </div>
-                </>
-              ) : score <= 6 ? (
-                <>
-                  <div className="recommendation-item">
-                    <span className="rec-icon">🧘</span>
-                    <span>Practice mindfulness exercises</span>
-                  </div>
-                  <div className="recommendation-item">
-                    <span className="rec-icon">⏰</span>
-                    <span>Use time-blocking techniques</span>
-                  </div>
-                  <div className="recommendation-item">
-                    <span className="rec-icon">📱</span>
-                    <span>Limit digital distractions</span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="recommendation-item">
-                    <span className="rec-icon">👨‍⚕️</span>
-                    <span>Consider professional consultation</span>
-                  </div>
-                  <div className="recommendation-item">
-                    <span className="rec-icon">💊</span>
-                    <span>Review medication with doctor</span>
-                  </div>
-                  <div className="recommendation-item">
-                    <span className="rec-icon">🏃</span>
-                    <span>Increase physical activity</span>
-                  </div>
-                </>
-              )}
             </div>
           </div>
         </div>

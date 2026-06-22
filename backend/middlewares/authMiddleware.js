@@ -1,5 +1,7 @@
 import jwt from "jsonwebtoken";
 
+const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-key-change-in-production";
+
 export const authenticate = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -9,7 +11,7 @@ export const authenticate = (req, res, next) => {
     }
 
     const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
 
     req.user = decoded; // { id, email }
     next();

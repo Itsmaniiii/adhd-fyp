@@ -25,3 +25,7 @@ export const submitQuestionnaire = async (payload) => {
 export const getQuestionnaireByUser = async (userId) => {
   return await questionnaireRepo.getQuestionnaireByUser(userId);
 };
+
+export const getLatestQuestionnaireByUser = async (userId) => {
+  return await questionnaireRepo.getLatestQuestionnaireByUser(userId);
+};

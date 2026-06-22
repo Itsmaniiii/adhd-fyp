@@ -17,11 +17,11 @@ const SeverityChecker = ({ answers, questions, mlResult, score: propScore }) => 
       }
     });
 
-    // Use prop score if provided, otherwise calculate
-    let normalizedScore = propScore;
-    if (!normalizedScore && maxPossible > 0) {
-      normalizedScore = Math.min(Math.max(Math.round((totalScore / maxPossible) * 10), 1), 10);
-    }
+    // Use the parent-calculated local score only.
+    // The local score should be based on one formula:
+    // round((totalScore / maxPossible) * 10)
+    let normalizedScore = Number.isFinite(propScore) ? propScore : 0;
+    normalizedScore = Math.max(0, Math.min(10, normalizedScore));
 
     // Determine severity level
     let level, color, description;
@@ -72,10 +72,6 @@ const SeverityChecker = ({ answers, questions, mlResult, score: propScore }) => 
       
       <div style={{ fontSize: "48px", fontWeight: "bold", color: severity.color, marginBottom: "10px" }}>
         {severity.score}/10
-      </div>
-      
-      <div style={{ fontSize: "14px", color: "#666", marginBottom: "10px" }}>
-        Total Score: {severity.totalScore} / {severity.maxPossible}
       </div>
       
       <p style={{ color: "#666", fontSize: "14px", marginBottom: "15px" }}>

@@ -1,11 +1,10 @@
 import api from "./axios";
 
 // Questionnaire API calls
-export const submitQuestionnaire = async (userId, questions) => {
+export const submitQuestionnaire = async (questions) => {
   try {
     const response = await api.post("/questionnaire/submit", {
-      user_id: userId,
-      questions: questions
+      questions
     });
     return response.data;
   } catch (error) {

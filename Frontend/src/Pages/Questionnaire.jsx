@@ -1,11 +1,14 @@
 import React, { useState } from "react";
-import SeverityCheck from '../Pages/SeverityCheck';
+import { useNavigate } from "react-router-dom";
+import { submitQuestionnaire } from "../api/questionnaire";
 
 const Questionnaire = () => {
+  const navigate = useNavigate();
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [hoveredOption, setHoveredOption] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
  const questions = [
   {
@@ -158,23 +161,44 @@ const Questionnaire = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const allAnswered = questions.every(q => answers[q.id]);
-    
+
     if (!allAnswered) {
-      alert("Please answer all questions before submitting!");
+      alert("Pehle sab questions ka answer do!");
       return;
     }
-    
-    setSubmitted(true);
-  };
 
+    setIsSubmitting(true);
+
+    try {
+      const formattedQuestions = questions.map((q) => ({
+        question: q.text,
+        answer: String(answers[q.id]?.value ?? ""),
+        score: Number(answers[q.id]?.score ?? 0)
+      }));
+
+      await submitQuestionnaire(formattedQuestions);
+      setSubmitted(true);
+
+      navigate("/severity-check", {
+        replace: true,
+        state: {
+          answers,
+          questions
+        }
+      });
+    } catch (error) {
+      console.error("Questionnaire submit failed:", error);
+      alert("Failed to save questionnaire. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   const currentQ = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
-  if (submitted) {
-    return <SeverityCheck answers={answers} questions={questions} />;
-  }
+  
 
   return (
     <div style={styles.container}>
@@ -261,8 +285,16 @@ const Questionnaire = () => {
             Next Question →
           </button>
         ) : (
-          <button onClick={handleSubmit} style={{...styles.button, ...styles.buttonSubmit}}>
-            Submit Assessment ✓
+          <button 
+            onClick={handleSubmit} 
+            disabled={isSubmitting}
+            style={{
+              ...styles.button, 
+              ...styles.buttonSubmit,
+              ...(isSubmitting && styles.buttonDisabled)
+            }}
+          >
+            {isSubmitting ? "Saving..." : "Submit Assessment ✓"}
           </button>
         )}
       </div>
